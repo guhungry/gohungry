@@ -23,14 +23,7 @@ func init() {
 	}
 }
 
-func ensureInit() {
-	if lineBreak != "" {
-		return
-	}
-}
-
 // Dump variable with type for debug
 func Dump(variable any) {
-	ensureInit()
 	_, _ = fmt.Fprintf(out, "%T: %+v%s", variable, variable, lineBreak)
 }
