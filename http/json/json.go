@@ -6,19 +6,31 @@ import (
 	"io"
 )
 
-func Get[T any](url string) (*T, error) {
-	return requestJson[T](http.MethodGet, url, nil)
+// contentType is the MIME type for JSON content.
+const contentType = "application/json"
+
+// Get sends an HTTP GET request and decodes the JSON response into type T.
+func Get[T any](url string, options ...http.RequestInfoOption[T]) (*T, error) {
+	return requestJSON[T](http.MethodGet, url, nil, options...)
 }
 
-func Post[T any](url string, body any) (*T, error) {
-	return requestJson[T](http.MethodPost, url, body)
+// Post sends an HTTP POST request with JSON body and decodes the response into type T.
+func Post[T any](url string, body any, options ...http.RequestInfoOption[T]) (*T, error) {
+	return requestJSON[T](http.MethodPost, url, body, options...)
 }
 
-func requestJson[T any](method string, url string, body any) (*T, error) {
+// requestJSON sets up and sends an HTTP request with JSON content and decodes the response.
+func requestJSON[T any](method string, url string, body any, options ...http.RequestInfoOption[T]) (*T, error) {
 	var result T
-	return http.DoRequest(method, url, body, json.Marshal, toResponseObject(&result))
+	options = append(options,
+		http.WithAccept[T](contentType),
+		http.WithContentType[T](contentType),
+	)
+	request := http.NewRequestInfo(method, url, body, json.Marshal, toResponseObject(&result), options...)
+	return http.DoRequest[T](request)
 }
 
+// toResponseObject creates a function that decodes a JSON response into type T.
 func toResponseObject[T any](result *T) func(reader io.ReadCloser) (*T, error) {
 	return func(reader io.ReadCloser) (*T, error) {
 		if err := json.NewDecoder(reader).Decode(result); err != nil {

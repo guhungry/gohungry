@@ -6,19 +6,31 @@ import (
 	"io"
 )
 
-func Get[T any](url string) (*T, error) {
-	return requestXml[T](http.MethodGet, url, nil)
+// contentType is the MIME type for XML content.
+const contentType = "application/xml"
+
+// Get sends an HTTP GET request and decodes the XML response into type T.
+func Get[T any](url string, options ...http.RequestInfoOption[T]) (*T, error) {
+	return requestXML[T](http.MethodGet, url, nil, options...)
 }
 
-func Post[T any](url string, body any) (*T, error) {
-	return requestXml[T](http.MethodPost, url, body)
+// Post sends an HTTP POST request with XML body and decodes the response into type T.
+func Post[T any](url string, body any, options ...http.RequestInfoOption[T]) (*T, error) {
+	return requestXML[T](http.MethodPost, url, body, options...)
 }
 
-func requestXml[T any](method string, url string, body any) (*T, error) {
+// requestXML sets up and sends an HTTP request with XML content and decodes the response.
+func requestXML[T any](method string, url string, body any, options ...http.RequestInfoOption[T]) (*T, error) {
 	var result T
-	return http.DoRequest(method, url, body, xml.Marshal, toResponseObject(&result))
+	options = append(options,
+		http.WithAccept[T](contentType),
+		http.WithContentType[T](contentType),
+	)
+	request := http.NewRequestInfo(method, url, body, xml.Marshal, toResponseObject(&result), options...)
+	return http.DoRequest(request)
 }
 
+// toResponseObject creates a function that decodes an XML response into type T.
 func toResponseObject[T any](result *T) func(reader io.ReadCloser) (*T, error) {
 	return func(reader io.ReadCloser) (*T, error) {
 		if err := xml.NewDecoder(reader).Decode(result); err != nil {
