@@ -10,11 +10,6 @@ updates:
     directory: "/"
     schedule:
       interval: daily
-      time: "06:00"
-      timezone: "America/Toronto"
-    open-pull-requests-limit: 99
-    commit-message:
-      prefix: "build: "
   - package-ecosystem: "gomod" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
