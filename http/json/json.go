@@ -6,33 +6,37 @@ import (
 	"io"
 )
 
-// contentType is the MIME type for JSON content.
+// contentType specifies the MIME type for JSON content.
 const contentType = "application/json"
 
-// Get sends an HTTP GET request and decodes the JSON response into type T.
-func Get[T any](url string, options ...http.RequestInfoOption[T]) (*T, error) {
-	return requestJSON[T](http.MethodGet, url, nil, options...)
+// Get performs an HTTP GET, decodes JSON response into 'Response'.
+// 'url' is the request target, 'options' customize the request.
+func Get[Response any](url string, options ...http.RequestInfoOption[Response]) (*Response, error) {
+	return requestJSON[Response](http.MethodGet, url, nil, options...)
 }
 
-// Post sends an HTTP POST request with JSON body and decodes the response into type T.
-func Post[T any](url string, body any, options ...http.RequestInfoOption[T]) (*T, error) {
-	return requestJSON[T](http.MethodPost, url, body, options...)
+// Post performs an HTTP POST with JSON body, decodes response into 'Response'.
+// 'url' is the request target, 'body' is the payload, 'options' customize the request.
+func Post[Response any](url string, body any, options ...http.RequestInfoOption[Response]) (*Response, error) {
+	return requestJSON[Response](http.MethodPost, url, body, options...)
 }
 
-// requestJSON sets up and sends an HTTP request with JSON content and decodes the response.
-func requestJSON[T any](method string, url string, body any, options ...http.RequestInfoOption[T]) (*T, error) {
+// requestJSON sends an HTTP request and decodes JSON response into 'Response'.
+// 'method' is the HTTP method, 'url' is the request target, 'body' is the payload for POST,
+// 'options' customize the request.
+func requestJSON[Response any](method string, url string, body any, options ...http.RequestInfoOption[Response]) (*Response, error) {
 	options = append(options,
-		http.WithAccept[T](contentType),
-		http.WithContentType[T](contentType),
+		http.WithAccept[Response](contentType),
+		http.WithContentType[Response](contentType),
 	)
-	request := http.NewRequestInfo(method, url, body, json.Marshal, toResponseObject[T](), options...)
-	return http.DoRequest[T](request)
+	request := http.NewRequestInfo(method, url, body, json.Marshal, toResponseObject[Response](), options...)
+	return http.DoRequest[Response](request)
 }
 
-// toResponseObject creates a function that decodes a JSON response into type T.
-func toResponseObject[T any]() http.ResponseBodyParser[T] {
-	return func(reader io.ReadCloser) (*T, error) {
-		var result T
+// toResponseObject returns a function that decodes JSON into 'Response'.
+func toResponseObject[Response any]() http.ResponseBodyParser[Response] {
+	return func(reader io.ReadCloser) (*Response, error) {
+		var result Response
 		if err := json.NewDecoder(reader).Decode(&result); err != nil {
 			return nil, err
 		}

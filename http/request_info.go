@@ -2,18 +2,21 @@ package http
 
 import "io"
 
+// RequestBodySerializer serializes a request body into a byte slice.
 type RequestBodySerializer func(body any) ([]byte, error)
-type ResponseBodyParser[T any] func(reader io.ReadCloser) (*T, error)
 
-// RequestInfo contains HTTP request information including methods for serializing
-// the request body and deserializing the response body, as well as HTTP headers.
+// ResponseBodyParser decodes a response body into a specified type 'Response'.
+type ResponseBodyParser[Response any] func(reader io.ReadCloser) (*Response, error)
+
+// RequestInfo holds configurations for an HTTP request, including serialization
+// for the request body and deserialization for the response body.
 // Use NewRequestInfo to initialize this struct.
-type RequestInfo[T any] struct {
+type RequestInfo[Response any] struct {
 	method         string
 	url            string
 	body           any
 	bodySerializer RequestBodySerializer
-	responseParser ResponseBodyParser[T]
+	responseParser ResponseBodyParser[Response]
 	authType       string
 	authUsername   string
 	authPassword   string
@@ -21,12 +24,12 @@ type RequestInfo[T any] struct {
 	headers        map[string]string // HTTP Headers
 }
 
-// RequestInfoOption is a function type that modifies RequestInfo.
-type RequestInfoOption[T any] func(c *RequestInfo[T])
+// RequestInfoOption modifies a RequestInfo instance.
+type RequestInfoOption[Response any] func(c *RequestInfo[Response])
 
-// NewRequestInfo initializes and returns a new RequestInfo with the given parameters.
-func NewRequestInfo[T any](method string, url string, body any, bodySerializer RequestBodySerializer, responseParser ResponseBodyParser[T], options ...RequestInfoOption[T]) *RequestInfo[T] {
-	result := &RequestInfo[T]{
+// NewRequestInfo creates a new RequestInfo with specified parameters and options.
+func NewRequestInfo[Response any](method string, url string, body any, bodySerializer RequestBodySerializer, responseParser ResponseBodyParser[Response], options ...RequestInfoOption[Response]) *RequestInfo[Response] {
+	result := &RequestInfo[Response]{
 		method:         method,
 		url:            url,
 		body:           body,
@@ -41,36 +44,36 @@ func NewRequestInfo[T any](method string, url string, body any, bodySerializer R
 	return result
 }
 
-// WithAuthBasic adds basic authentication to the HTTP request.
-func WithAuthBasic[T any](username, password string) RequestInfoOption[T] {
-	return func(c *RequestInfo[T]) {
+// WithAuthBasic sets basic authentication credentials for the request.
+func WithAuthBasic[Response any](username, password string) RequestInfoOption[Response] {
+	return func(c *RequestInfo[Response]) {
 		c.authType = AuthTypeBasic
 		c.authUsername = username
 		c.authPassword = password
 	}
 }
 
-// WithAuthBearer adds bearer token authentication to the HTTP request.
-func WithAuthBearer[T any](token string) RequestInfoOption[T] {
-	return func(c *RequestInfo[T]) {
+// WithAuthBearer sets bearer token authentication for the request.
+func WithAuthBearer[Response any](token string) RequestInfoOption[Response] {
+	return func(c *RequestInfo[Response]) {
 		c.authType = AuthTypeBearer
 		c.authToken = token
 	}
 }
 
-// WithHeader adds a key-value pair to the HTTP headers of the request.
-func WithHeader[T any](key, value string) RequestInfoOption[T] {
-	return func(c *RequestInfo[T]) {
+// WithHeader adds a header to the request.
+func WithHeader[Response any](key, value string) RequestInfoOption[Response] {
+	return func(c *RequestInfo[Response]) {
 		c.headers[key] = value
 	}
 }
 
-// WithContentType adds a Content-Type header to the HTTP request.
-func WithContentType[T any](value string) RequestInfoOption[T] {
-	return WithHeader[T](HeaderContentType, value)
+// WithContentType sets the Content-Type header for the request.
+func WithContentType[Response any](value string) RequestInfoOption[Response] {
+	return WithHeader[Response](HeaderContentType, value)
 }
 
-// WithAccept adds an Accept header to the HTTP request.
-func WithAccept[T any](value string) RequestInfoOption[T] {
-	return WithHeader[T](HeaderAccept, value)
+// WithAccept sets the Accept header for the request.
+func WithAccept[Response any](value string) RequestInfoOption[Response] {
+	return WithHeader[Response](HeaderAccept, value)
 }

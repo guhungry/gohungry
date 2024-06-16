@@ -6,8 +6,9 @@ import (
 	"net/http"
 )
 
-// DoRequest sends an HTTP request and converts the response into a Response object of type T.
-func DoRequest[T any](data *RequestInfo[T]) (*T, error) {
+// DoRequest executes an HTTP request and decodes the response into 'Request'.
+// 'data' contains request configurations and handlers.
+func DoRequest[Request any](data *RequestInfo[Request]) (*Request, error) {
 	// Serialize Request Body
 	bodyReader, err := toBodyReader(data.body, data.bodySerializer)
 	if err != nil {
@@ -41,15 +42,15 @@ func DoRequest[T any](data *RequestInfo[T]) (*T, error) {
 	return response, nil
 }
 
-// setHeaders sets the headers for the HTTP request.
+// setHeaders applies provided headers to the HTTP request.
 func setHeaders(req *http.Request, headers map[string]string) {
 	for k, v := range headers {
 		req.Header.Set(k, v)
 	}
 }
 
-// setAuth sets the authentication for the HTTP request based on the provided RequestInfo.
-func setAuth[T any](req *http.Request, data *RequestInfo[T]) {
+// setAuth configures authentication for the HTTP request using 'data'.
+func setAuth[Request any](req *http.Request, data *RequestInfo[Request]) {
 	switch data.authType {
 	case AuthTypeBasic:
 		req.SetBasicAuth(data.authUsername, data.authPassword)
@@ -60,8 +61,9 @@ func setAuth[T any](req *http.Request, data *RequestInfo[T]) {
 	}
 }
 
-// toBodyReader serializes the body using the provided serializer function and returns a bytes.Reader.
-func toBodyReader(body any, serializer func(body any) ([]byte, error)) (*bytes.Reader, error) {
+// toBodyReader creates a reader for serialized request body.
+// 'body' is the payload, 'serializer' converts it to a byte slice.
+func toBodyReader(body any, serializer RequestBodySerializer) (*bytes.Reader, error) {
 	if body == nil {
 		return bytes.NewReader([]byte{}), nil
 	}
