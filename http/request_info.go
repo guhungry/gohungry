@@ -2,6 +2,9 @@ package http
 
 import "io"
 
+type RequestBodySerializer func(body any) ([]byte, error)
+type ResponseBodyParser[T any] func(reader io.ReadCloser) (*T, error)
+
 // RequestInfo contains HTTP request information including methods for serializing
 // the request body and deserializing the response body, as well as HTTP headers.
 // Use NewRequestInfo to initialize this struct.
@@ -9,8 +12,8 @@ type RequestInfo[T any] struct {
 	method         string
 	url            string
 	body           any
-	bodySerializer func(body any) ([]byte, error)
-	responseParser func(reader io.ReadCloser) (*T, error)
+	bodySerializer RequestBodySerializer
+	responseParser ResponseBodyParser[T]
 	authType       string
 	authUsername   string
 	authPassword   string
@@ -22,12 +25,12 @@ type RequestInfo[T any] struct {
 type RequestInfoOption[T any] func(c *RequestInfo[T])
 
 // NewRequestInfo initializes and returns a new RequestInfo with the given parameters.
-func NewRequestInfo[T any](method string, url string, body any, BodySerializer func(body any) ([]byte, error), responseParser func(reader io.ReadCloser) (*T, error), options ...RequestInfoOption[T]) *RequestInfo[T] {
+func NewRequestInfo[T any](method string, url string, body any, bodySerializer RequestBodySerializer, responseParser ResponseBodyParser[T], options ...RequestInfoOption[T]) *RequestInfo[T] {
 	result := &RequestInfo[T]{
 		method:         method,
 		url:            url,
 		body:           body,
-		bodySerializer: BodySerializer,
+		bodySerializer: bodySerializer,
 		responseParser: responseParser,
 		headers:        make(map[string]string),
 	}
