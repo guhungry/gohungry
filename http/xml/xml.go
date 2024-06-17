@@ -2,7 +2,7 @@ package xml
 
 import (
 	"encoding/xml"
-	"gohungry/http"
+	"github.com/guhungry/gohungry/http"
 	"io"
 )
 
