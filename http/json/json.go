@@ -2,7 +2,7 @@ package json
 
 import (
 	"encoding/json"
-	"gohungry/http"
+	"github.com/guhungry/gohungry/http"
 	"io"
 )
 
