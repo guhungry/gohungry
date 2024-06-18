@@ -17,7 +17,7 @@ type RequestInfo[Response any] struct {
 	body           any
 	bodySerializer RequestBodySerializer
 	responseParser ResponseBodyParser[Response]
-	authType       string
+	authType       AuthType
 	authUsername   string
 	authPassword   string
 	authToken      string

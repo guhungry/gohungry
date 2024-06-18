@@ -55,7 +55,7 @@ func setAuth[Request any](req *http.Request, data *RequestInfo[Request]) {
 	case AuthTypeBasic:
 		req.SetBasicAuth(data.authUsername, data.authPassword)
 	case AuthTypeBearer:
-		req.Header.Add(HeaderAuthorization, data.authType+" "+data.authToken)
+		req.Header.Add(HeaderAuthorization, string(AuthTypeBearer)+" "+data.authToken)
 	default:
 		// No authentication required
 	}

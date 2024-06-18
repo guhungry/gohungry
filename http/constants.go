@@ -8,10 +8,13 @@ const (
 	MethodPost = http.MethodPost // POST method for HTTP requests
 )
 
-// Authentication type constants
+// AuthType represents the type of authentication used in HTTP requests
+type AuthType string
+
+// Authentication type constants as defined by relevant RFCs
 const (
-	AuthTypeBasic  = "Basic"  // Basic authentication type (RFC 7617)
-	AuthTypeBearer = "Bearer" // Bearer token authentication type (RFC 6750)
+	AuthTypeBasic  AuthType = "Basic"  // Basic authentication as per RFC 7617
+	AuthTypeBearer AuthType = "Bearer" // Bearer token authentication as per RFC 6750
 )
 
 // Common HTTP header constants
