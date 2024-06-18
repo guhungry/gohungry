@@ -43,7 +43,7 @@ func DoRequest[Request any](data *RequestInfo[Request]) (*Request, error) {
 }
 
 // setHeaders applies provided headers to the HTTP request.
-func setHeaders(req *http.Request, headers map[string]string) {
+func setHeaders(req *http.Request, headers Headers) {
 	for k, v := range headers {
 		req.Header.Set(k, v)
 	}
@@ -51,11 +51,12 @@ func setHeaders(req *http.Request, headers map[string]string) {
 
 // setAuth configures authentication for the HTTP request using 'data'.
 func setAuth[Request any](req *http.Request, data *RequestInfo[Request]) {
+	auth := data.authCredentials
 	switch data.authType {
 	case AuthTypeBasic:
-		req.SetBasicAuth(data.authUsername, data.authPassword)
+		req.SetBasicAuth(auth.username, auth.password)
 	case AuthTypeBearer:
-		req.Header.Add(HeaderAuthorization, string(AuthTypeBearer)+" "+data.authToken)
+		req.Header.Add(HeaderAuthorization, string(AuthTypeBearer)+" "+auth.token)
 	default:
 		// No authentication required
 	}

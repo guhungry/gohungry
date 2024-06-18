@@ -12,17 +12,25 @@ type ResponseBodyParser[Response any] func(reader io.ReadCloser) (*Response, err
 // for the request body and deserialization for the response body.
 // Use NewRequestInfo to initialize this struct.
 type RequestInfo[Response any] struct {
-	method         string
-	url            string
-	body           any
-	bodySerializer RequestBodySerializer
-	responseParser ResponseBodyParser[Response]
-	authType       AuthType
-	authUsername   string
-	authPassword   string
-	authToken      string
-	headers        map[string]string // HTTP Headers
+	method          string
+	url             string
+	body            any
+	bodySerializer  RequestBodySerializer
+	responseParser  ResponseBodyParser[Response]
+	authType        AuthType
+	authCredentials AuthCredentials
+	headers         Headers // HTTP Headers
 }
+
+// AuthCredentials holds authentication credentials.
+type AuthCredentials struct {
+	username string
+	password string
+	token    string
+}
+
+// Headers represents HTTP headers as a map.
+type Headers map[string]string
 
 // RequestInfoOption modifies a RequestInfo instance.
 type RequestInfoOption[Response any] func(c *RequestInfo[Response])
@@ -35,7 +43,7 @@ func NewRequestInfo[Response any](method string, url string, body any, bodySeria
 		body:           body,
 		bodySerializer: bodySerializer,
 		responseParser: responseParser,
-		headers:        make(map[string]string),
+		headers:        make(Headers),
 	}
 
 	for _, option := range options {
@@ -48,8 +56,7 @@ func NewRequestInfo[Response any](method string, url string, body any, bodySeria
 func WithAuthBasic[Response any](username, password string) RequestInfoOption[Response] {
 	return func(c *RequestInfo[Response]) {
 		c.authType = AuthTypeBasic
-		c.authUsername = username
-		c.authPassword = password
+		c.authCredentials = AuthCredentials{username: username, password: password}
 	}
 }
 
@@ -57,7 +64,7 @@ func WithAuthBasic[Response any](username, password string) RequestInfoOption[Re
 func WithAuthBearer[Response any](token string) RequestInfoOption[Response] {
 	return func(c *RequestInfo[Response]) {
 		c.authType = AuthTypeBearer
-		c.authToken = token
+		c.authCredentials = AuthCredentials{token: token}
 	}
 }
 
