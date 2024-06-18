@@ -1,3 +1,6 @@
+// Package json provides utilities for making HTTP requests with JSON payloads
+// and parsing JSON responses. It includes functions for performing GET and POST
+// requests with JSON content, along with customizable options for request configuration.
 package json
 
 import (

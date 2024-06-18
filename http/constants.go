@@ -1,3 +1,7 @@
+// Package http provides utilities and abstractions for making HTTP requests
+// with customizable request and response handling. It includes support for
+// setting headers, authentication methods, and serializing/deserializing
+// request and response bodies.
 package http
 
 import "net/http"

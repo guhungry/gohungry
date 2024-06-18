@@ -1,3 +1,6 @@
+// Package httptest provides utilities for testing HTTP clients and servers.
+// It includes dummy serializers and parsers, as well as mock implementations
+// of the HTTPClient interface to simulate various HTTP responses.
 package httptest
 
 import (

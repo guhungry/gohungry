@@ -1,3 +1,6 @@
+// Package xml provides utilities for making HTTP requests with XML payloads
+// and parsing XML responses. It includes functions for performing GET and POST
+// requests with XML content, along with customizable options for request configuration.
 package xml
 
 import (
