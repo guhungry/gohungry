@@ -29,17 +29,16 @@ func requestJSON[Response any](method string, url string, body any, options ...h
 		http.WithAccept[Response](contentType),
 		http.WithContentType[Response](contentType),
 	)
-	request := http.NewRequestInfo(method, url, body, json.Marshal, toResponseObject[Response](), options...)
+	request := http.NewRequestInfo(method, url, body, json.Marshal, toResponseObject[Response], options...)
 	return http.DoRequest[Response](request)
 }
 
-// toResponseObject returns a function that decodes JSON into 'Response'.
-func toResponseObject[Response any]() http.ResponseBodyParser[Response] {
-	return func(reader io.ReadCloser) (*Response, error) {
-		var result Response
-		if err := json.NewDecoder(reader).Decode(&result); err != nil {
-			return nil, err
-		}
-		return &result, nil
+// toResponseObject decodes JSON into 'Response'.
+func toResponseObject[Response any](reader io.ReadCloser) (*Response, error) {
+	var result Response
+	decoder := json.NewDecoder(reader)
+	if err := decoder.Decode(&result); err != nil {
+		return nil, err
 	}
+	return &result, nil
 }

@@ -29,18 +29,16 @@ func requestXML[Response any](method string, url string, body any, options ...ht
 		http.WithAccept[Response](contentType),
 		http.WithContentType[Response](contentType),
 	)
-	request := http.NewRequestInfo(method, url, body, xml.Marshal, toResponseObject[Response](), options...)
+	request := http.NewRequestInfo(method, url, body, xml.Marshal, toResponseObject[Response], options...)
 	return http.DoRequest(request)
 }
 
-// toResponseObject returns a function that decodes XML into 'Response'.
-func toResponseObject[Response any]() http.ResponseBodyParser[Response] {
-	return func(reader io.ReadCloser) (*Response, error) {
-		var result Response
-		decoder := xml.NewDecoder(reader)
-		if err := decoder.Decode(&result); err != nil {
-			return nil, err
-		}
-		return &result, nil
+// toResponseObject decodes XML into 'Response'.
+func toResponseObject[Response any](reader io.ReadCloser) (*Response, error) {
+	var result Response
+	decoder := xml.NewDecoder(reader)
+	if err := decoder.Decode(&result); err != nil {
+		return nil, err
 	}
+	return &result, nil
 }
