@@ -1,6 +1,7 @@
 package http
 
 import (
+	"github.com/guhungry/gohungry/http/httptest"
 	"testing"
 )
 
@@ -23,8 +24,8 @@ func TestNewRequestInfo(t *testing.T) {
 				method:         "GET",
 				url:            "http://example.com",
 				body:           nil,
-				bodySerializer: dummyRequestBodySerializer,
-				responseParser: dummyResponseBodyParser[any],
+				bodySerializer: httptest.DummyRequestBodySerializer,
+				responseParser: httptest.DummyResponseBodyParser[any],
 				headers:        make(Headers),
 			},
 		},
@@ -40,8 +41,8 @@ func TestNewRequestInfo(t *testing.T) {
 				method:         "POST",
 				url:            "http://example.com",
 				body:           "some body",
-				bodySerializer: dummyRequestBodySerializer,
-				responseParser: dummyResponseBodyParser[any],
+				bodySerializer: httptest.DummyRequestBodySerializer,
+				responseParser: httptest.DummyResponseBodyParser[any],
 				authType:       AuthTypeBasic,
 				authCredentials: AuthCredentials{
 					username: "user",
@@ -62,8 +63,8 @@ func TestNewRequestInfo(t *testing.T) {
 				method:         "PUT",
 				url:            "http://example.com",
 				body:           "some body",
-				bodySerializer: dummyRequestBodySerializer,
-				responseParser: dummyResponseBodyParser[any],
+				bodySerializer: httptest.DummyRequestBodySerializer,
+				responseParser: httptest.DummyResponseBodyParser[any],
 				authType:       AuthTypeBearer,
 				authCredentials: AuthCredentials{
 					token: "some-token",
@@ -85,8 +86,8 @@ func TestNewRequestInfo(t *testing.T) {
 				method:         "DELETE",
 				url:            "http://example.com",
 				body:           nil,
-				bodySerializer: dummyRequestBodySerializer,
-				responseParser: dummyResponseBodyParser[any],
+				bodySerializer: httptest.DummyRequestBodySerializer,
+				responseParser: httptest.DummyResponseBodyParser[any],
 				headers: Headers{
 					"Custom-Header":   "value",
 					HeaderContentType: "application/json",
@@ -98,7 +99,7 @@ func TestNewRequestInfo(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := NewRequestInfo(tt.method, tt.url, tt.body, dummyRequestBodySerializer, dummyResponseBodyParser[any], tt.options...)
+			result := NewRequestInfo(tt.method, tt.url, tt.body, httptest.DummyRequestBodySerializer, httptest.DummyResponseBodyParser[any], tt.options...)
 			if !equalRequestInfo(result, &tt.expected) {
 				t.Errorf("NewRequestInfo() = %v, expected %v", result, tt.expected)
 			}

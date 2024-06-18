@@ -3,32 +3,15 @@ package http
 import (
 	"bytes"
 	"errors"
+	"github.com/guhungry/gohungry/http/httptest"
 	"io"
 	"net/http"
 	"testing"
 )
 
-// MockHTTPClient is a mock implementation of the HTTPClient interface for testing.
-type MockHTTPClient struct {
-	DoFunc func(req *http.Request) (*http.Response, error)
-}
-
-// Do executes the mocked HTTP request.
-func (m *MockHTTPClient) Do(req *http.Request) (*http.Response, error) {
-	return m.DoFunc(req)
-}
-
 // TestDoRequest tests the DoRequest function.
 func TestDoRequest(t *testing.T) {
-	mockClient := &MockHTTPClient{
-		DoFunc: func(req *http.Request) (*http.Response, error) {
-			body := io.NopCloser(bytes.NewBufferString(`{"message":"success"}`))
-			return &http.Response{
-				StatusCode: 200,
-				Body:       body,
-			}, nil
-		},
-	}
+	mockClient := httptest.MockHTTPClientSuccess(200, `{"message":"success"}`)
 	SetHTTPClient(mockClient)
 	defer ResetHTTPClient()
 
@@ -45,8 +28,8 @@ func TestDoRequest(t *testing.T) {
 				method:         MethodPost,
 				url:            "https://example.com",
 				body:           map[string]string{"key": "value"},
-				bodySerializer: dummyRequestBodySerializer,
-				responseParser: dummyResponseBodyParser[map[string]interface{}],
+				bodySerializer: httptest.DummyRequestBodySerializer,
+				responseParser: httptest.DummyResponseBodyParser[map[string]interface{}],
 				headers:        Headers{HeaderContentType: "application/json"},
 			},
 			expectedBody:   "dummy body",
@@ -60,7 +43,7 @@ func TestDoRequest(t *testing.T) {
 				url:            "https://example.com",
 				body:           map[string]string{"key": "value"},
 				bodySerializer: func(body any) ([]byte, error) { return nil, io.ErrUnexpectedEOF },
-				responseParser: dummyResponseBodyParser[map[string]interface{}],
+				responseParser: httptest.DummyResponseBodyParser[map[string]interface{}],
 				headers:        Headers{HeaderContentType: "application/json"},
 			},
 			expectedBody:   "",
@@ -151,14 +134,14 @@ func TestToBodyReader(t *testing.T) {
 		{
 			name:          "Nil Body",
 			body:          nil,
-			serializer:    dummyRequestBodySerializer,
+			serializer:    httptest.DummyRequestBodySerializer,
 			expectedBody:  "",
 			expectedError: nil,
 		},
 		{
 			name:          "Valid Body",
 			body:          map[string]string{"key": "value"},
-			serializer:    dummyRequestBodySerializer,
+			serializer:    httptest.DummyRequestBodySerializer,
 			expectedBody:  "dummy body",
 			expectedError: nil,
 		},

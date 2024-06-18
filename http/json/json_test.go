@@ -1,24 +1,11 @@
 package json
 
 import (
-	"bytes"
-	"errors"
-	"io"
-	"net/http"
+	"github.com/guhungry/gohungry/http/httptest"
 	"testing"
 
 	gohungry "github.com/guhungry/gohungry/http"
 )
-
-// MockHTTPClient is a mock implementation of the HTTPClient interface for testing.
-type MockHTTPClient struct {
-	DoFunc func(req *http.Request) (*http.Response, error)
-}
-
-// Do executes the mocked HTTP request.
-func (m *MockHTTPClient) Do(req *http.Request) (*http.Response, error) {
-	return m.DoFunc(req)
-}
 
 // Mock response data structure
 type MockResponse struct {
@@ -26,15 +13,7 @@ type MockResponse struct {
 }
 
 func TestGet(t *testing.T) {
-	mockClient := &MockHTTPClient{
-		DoFunc: func(req *http.Request) (*http.Response, error) {
-			body := io.NopCloser(bytes.NewBufferString(`{"message":"success"}`))
-			return &http.Response{
-				StatusCode: 200,
-				Body:       body,
-			}, nil
-		},
-	}
+	mockClient := httptest.MockHTTPClientSuccess(200, `{"message":"success"}`)
 	gohungry.SetHTTPClient(mockClient)
 	defer gohungry.ResetHTTPClient()
 
@@ -49,15 +28,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestPost(t *testing.T) {
-	mockClient := &MockHTTPClient{
-		DoFunc: func(req *http.Request) (*http.Response, error) {
-			body := io.NopCloser(bytes.NewBufferString(`{"message":"created"}`))
-			return &http.Response{
-				StatusCode: 201,
-				Body:       body,
-			}, nil
-		},
-	}
+	mockClient := httptest.MockHTTPClientSuccess(201, `{"message":"created"}`)
 	gohungry.SetHTTPClient(mockClient)
 	defer gohungry.ResetHTTPClient()
 
@@ -73,11 +44,7 @@ func TestPost(t *testing.T) {
 }
 
 func TestGetWithError(t *testing.T) {
-	mockClient := &MockHTTPClient{
-		DoFunc: func(req *http.Request) (*http.Response, error) {
-			return nil, errors.New("network error")
-		},
-	}
+	mockClient := httptest.MockHTTPClientError("network error")
 	gohungry.SetHTTPClient(mockClient)
 	defer gohungry.ResetHTTPClient()
 

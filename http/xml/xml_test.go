@@ -1,25 +1,12 @@
 package xml
 
 import (
-	"bytes"
 	"encoding/xml"
-	"errors"
-	"io"
-	"net/http"
+	"github.com/guhungry/gohungry/http/httptest"
 	"testing"
 
 	gohungry "github.com/guhungry/gohungry/http"
 )
-
-// MockHTTPClient is a mock implementation of the HTTPClient interface for testing.
-type MockHTTPClient struct {
-	DoFunc func(req *http.Request) (*http.Response, error)
-}
-
-// Do executes the mocked HTTP request.
-func (m *MockHTTPClient) Do(req *http.Request) (*http.Response, error) {
-	return m.DoFunc(req)
-}
 
 // Mock response data structure
 type MockResponse struct {
@@ -27,15 +14,7 @@ type MockResponse struct {
 }
 
 func TestGet(t *testing.T) {
-	mockClient := &MockHTTPClient{
-		DoFunc: func(req *http.Request) (*http.Response, error) {
-			body := io.NopCloser(bytes.NewBufferString(`<MockResponse><message>success</message></MockResponse>`))
-			return &http.Response{
-				StatusCode: 200,
-				Body:       body,
-			}, nil
-		},
-	}
+	mockClient := httptest.MockHTTPClientSuccess(200, `<MockResponse><message>success</message></MockResponse>`)
 	gohungry.SetHTTPClient(mockClient)
 	defer gohungry.ResetHTTPClient()
 
@@ -50,15 +29,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestPost(t *testing.T) {
-	mockClient := &MockHTTPClient{
-		DoFunc: func(req *http.Request) (*http.Response, error) {
-			body := io.NopCloser(bytes.NewBufferString(`<MockResponse><message>created</message></MockResponse>`))
-			return &http.Response{
-				StatusCode: 201,
-				Body:       body,
-			}, nil
-		},
-	}
+	mockClient := httptest.MockHTTPClientSuccess(201, `<MockResponse><message>created</message></MockResponse>`)
 	gohungry.SetHTTPClient(mockClient)
 	defer gohungry.ResetHTTPClient()
 
@@ -77,11 +48,7 @@ func TestPost(t *testing.T) {
 }
 
 func TestGetWithError(t *testing.T) {
-	mockClient := &MockHTTPClient{
-		DoFunc: func(req *http.Request) (*http.Response, error) {
-			return nil, errors.New("network error")
-		},
-	}
+	mockClient := httptest.MockHTTPClientError("network error")
 	gohungry.SetHTTPClient(mockClient)
 	defer gohungry.ResetHTTPClient()
 
@@ -92,15 +59,7 @@ func TestGetWithError(t *testing.T) {
 }
 
 func TestPostWithInvalidXML(t *testing.T) {
-	mockClient := &MockHTTPClient{
-		DoFunc: func(req *http.Request) (*http.Response, error) {
-			body := io.NopCloser(bytes.NewBufferString(`invalid xml`))
-			return &http.Response{
-				StatusCode: 200,
-				Body:       body,
-			}, nil
-		},
-	}
+	mockClient := httptest.MockHTTPClientSuccess(200, `invalid xml`)
 	gohungry.SetHTTPClient(mockClient)
 	defer gohungry.ResetHTTPClient()
 
