@@ -1,19 +1,8 @@
 package http
 
 import (
-	"io"
 	"testing"
 )
-
-// Dummy implementations for testing
-func dummyRequestBodySerializer(body any) ([]byte, error) {
-	return []byte("dummy"), nil
-}
-
-func dummyResponseBodyParser[Response any](reader io.ReadCloser) (*Response, error) {
-	var resp Response
-	return &resp, nil
-}
 
 // TestNewRequestInfo tests the NewRequestInfo function with various options
 func TestNewRequestInfo(t *testing.T) {
